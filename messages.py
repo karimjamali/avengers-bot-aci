@@ -1,0 +1,25 @@
+logged_in_message = "Congratulations, you have logged in successfully, to figure out the possible options types options"
+apic_fqdn_retry= "APIC FQDN is not correct, please make sure you enter a Fully Qualified Domain Name"
+message_chosen_option="You have made your mind"
+validation_done="Validation is done for FQDN"
+get_endpoints_confirmation="Are you sure you want to get all the endpoints?"
+create_epg_confirmation="Are you sure you want to create a new epg?"
+troubleshoot_communications_confirmation='Are you sure you want to troubleshoot communications between two endpoints?'
+email_address_input='Please specify the email address to send the findings'
+snapshot_created_template='snapshot has been created & stored locally with description {}'
+snapshot_failed='There was an error creating the snapshot'
+tenant_created_message='*Tenant {}* has been created successfully'
+tenant_failed_message='There was a problem creating Tenant {}'
+tenant_exists_message='*Tenant {}* is already available on APIC, thus we did not create it'
+tenant_ap_exist_message='*Tenant {}*  and Application Profile {} both exist!'
+tenant_exists_ap_created_message='*Tenant {}* exists, and we just created Application Profile {}'
+tenant_not_exist_message=' Tenant {} doesn\'t exist, please type create tenant and then try to create application profile'
+ap_epg_exist_message='Application Profile {} and EPG {} both exist'
+ap_exists_epg_created_message='AP {} exists, and we just created EPG {}'
+ap_not_exist_message='Under Tenant {}, Application Profile {} doesn\'t exist, please create one'
+tenant_bd_exist_message='Tenant {}  and Bridge Domain {} both exist!'
+tenant_exists_bd_created_message='Tenant {} exists, and we just created Bridge Domain {} '
+url_error = 'Please Check the URI as we have a 404 Error'
+url_credentials_error = 'Please Check the credentials as we have a 401 Error'
+all_endpoints_message = "Message to convey to the user. For example, Are you sure you want a large pizza?"
+
