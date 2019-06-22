@@ -4,6 +4,8 @@ from messages import *
 from utils import *
 
 
+
+
 def check_tenant_exists(url,cookies,tenant_name):
 
     full_url = "{}node/mo/uni/tn-{}.json".format(url,tenant_name)
@@ -38,7 +40,9 @@ def tenant_handler(event, context):
     #create new tenant if required
 
     print(event)
-
+    if not validate_if_logged_in(event):
+        return generate_response_code(event,"SKIP",dialog_type="ELICIT",
+                                      message="You have not logged in, please type login to proceed")
     url=event['sessionAttributes']['url']
     username=event['sessionAttributes']['username']
     password=event['sessionAttributes']['password']
@@ -55,8 +59,8 @@ def tenant_handler(event, context):
     print(tenant_exists)
 
     if tenant_exists == True:
-        tenant = "**{}**".format(tenant_name)
-        tenant_exists_msg = tenant_exists_message.format(tenant)
+        #tenant = "{}".format(tenant_name)
+        tenant_exists_msg = tenant_exists_message.format(tenant_name)
 
         intent_fulfilled_exist = generate_response_code(event, "SKIP",
                                                   dialog_type="CLOSEFULLFILLED",
@@ -75,8 +79,7 @@ def tenant_handler(event, context):
         response=create_tenant(url,cookies,tenant_name)
         print(response.status_code)
         if response.status_code == 200:
-            tenant = "**{}**".format(tenant_name)
-            tenant_created_msg=tenant_created_message.format(tenant)
+            tenant_created_msg=tenant_created_message.format(tenant_name)
 
             intent_fulfilled = generate_response_code(event, "SKIP",
                                                       dialog_type="CLOSEFULLFILLED",
@@ -92,8 +95,7 @@ def tenant_handler(event, context):
             #         }
             #     }
         else:
-            tenant = "**{}**".format(tenant_name)
-            tenant_failed_msg=tenant_failed_message.format(tenant)
+            tenant_failed_msg=tenant_failed_message.format(tenant_name)
 
             intent_failed = generate_response_code(event, "SKIP",
                                                    dialog_type="CLOSEFAILED",

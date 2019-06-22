@@ -1,7 +1,7 @@
 import json
 from string import Template
-from messages import tenant_ap_exist_message,tenant_exists_ap_created_message,tenant_not_exist_message
-from utils import make_get_api_call, make_post_api_call, aci_login, generate_response_code
+from messages import tenant_ap_exist_message,tenant_exists_ap_created_message,tenant_not_exist_message,error_create_app_profile_message,not_logged_in
+from utils import make_get_api_call, make_post_api_call, aci_login, generate_response_code,validate_if_logged_in
 
 
 def check_tenant_exists(base_url, cookies, tenant_name):
@@ -76,6 +76,10 @@ def create_tenant(base_url, cookies, tenant_name):
 def app_profile_handler(event, context):
     #Get the url,username,and password from session attributes
     print(event)
+
+    if not validate_if_logged_in(event):
+        return generate_response_code(event,"SKIP",dialog_type="ELICIT",
+                                      message=not_logged_in)
     url = event['sessionAttributes']['url']
     username = event['sessionAttributes']['username']
     password = event['sessionAttributes']['password']
@@ -112,23 +116,22 @@ def app_profile_handler(event, context):
        else:
          response=create_ap(url,cookies,tenant_name,ap)
          print(response)
-         if(response.status_code == 200):
-             tenant_exists_ap_created_msg=tenant_exists_ap_created_message.format(tenant_name,ap)
-             tenant_exists_ap_created = generate_response_code(event, "SKIP",
+         try:
+            if response.status_code == 200:
+                tenant_exists_ap_created_msg=tenant_exists_ap_created_message.format(tenant_name,ap)
+                tenant_exists_ap_created = generate_response_code(event, "SKIP",
                                                                dialog_type="CLOSEFULLFILLED",
                                                                message=tenant_exists_ap_created_msg)
-             print(tenant_exists_ap_created_msg)
-             return tenant_exists_ap_created
+                print(tenant_exists_ap_created_msg)
+                return tenant_exists_ap_created
 
-             # tenant_exists_ap_created = {
-             #     "dialogAction": {
-             #     "type": "Close",
-             #     "fulfillmentState": "Fulfilled",
-             #     "message": {"contentType": "PlainText","content": tenant_exists_ap_created_msg }
-             #     }
-             #     }
-             # print(tenant_exists_ap_created_msg)
-             # return tenant_exists_ap_created
+         except:
+            error_create_app_profile_msg=error_create_app_profile_message.format(ap,tenant_name)
+            error_create_app_profile= generate_response_code(event, "SKIP",
+                                                               dialog_type="CLOSEFULLFILLED",
+                                                               message=error_create_app_profile_msg)
+
+
     else:
              tenant_not_exist_msg=tenant_not_exist_message.format(tenant_name)
              tenant_not_exist = generate_response_code(event, "SKIP",

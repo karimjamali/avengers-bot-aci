@@ -1,0 +1,13 @@
+#Demo Alexa Variables
+tenant_name = 'avengers_alexa_tenant'
+app_profile = 'IOT'
+epg1 = 'web'
+epg2 = 'app'
+epg3 = 'db'
+bd1 = 'vlan10'
+bd2 = 'vlan11'
+bd3 = 'vlan12'
+subnet1 = '10.1.1.1'
+subnet2 = '10.1.2.1'
+subnet3 = '10.1.3.1'
+mask = '24'

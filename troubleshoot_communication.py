@@ -7,6 +7,8 @@ from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from utils import aci_login, generate_response_code,make_get_api_call,validate_if_logged_in
+from source_email import from_email
+
 
 def find_endpoint(endpoint_ip,url,cookies):
     endpoints_url= url + "node/class/fvCEp.json?query-target-filter=and(eq(fvCEp.ip, "'"{}"'"))".format(endpoint_ip)
@@ -155,7 +157,7 @@ def get_endpoints_handler(event, context):
         message+='{} does not exist\n'.format(source)
       f.write(row1),f.write(data1),f.write(data2)
     dest_email=temporary_email(dest_email)
-    send_email_w_attachment('karim.jamali@gmail.com',dest_email,subject, file_name)
+    send_email_w_attachment(from_email,dest_email,subject, file_name)
     message+='\n\nWe have gathered all the information about *{}* and *{}* and have sent an email to you about this'.format(source,destination)
     endpoints_resp=generate_response_code(event,"SKIP",dialog_type="CLOSEFULLFILLED",message=message)
 

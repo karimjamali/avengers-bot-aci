@@ -35,13 +35,6 @@ def snapshot_handler(event, context):
                                                   message=snapshot_created
                                                   )
 
-        # intent_fulfilled = {
-        #     "dialogAction": {
-        #     "type": "Close",
-        #     "fulfillmentState": "Fulfilled",
-        #     "message": {"contentType": "PlainText","content": snapshot_created }
-        #     }
-        #     }
         return intent_fulfilled
 
     else:
@@ -49,13 +42,7 @@ def snapshot_handler(event, context):
                                                dialog_type="CLOSEFAILED",
                                                message=snapshot_failed
                                                )
-        # intent_failed = {
-        #     "dialogAction": {
-        #     "type": "Close",
-        #     "fulfillmentState": "Failed",
-        #     "message": {"contentType": "PlainText","content": snapshot_failed }
-        #     }
-        #     }
+
         return intent_failed
 
 

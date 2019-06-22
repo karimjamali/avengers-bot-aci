@@ -1,4 +1,4 @@
-from messages import logged_in_message
+from messages import logged_in_message,login_challenge
 from utils import aci_login, generate_response_code
 
 
@@ -22,29 +22,33 @@ def login_handler(event, context):
     password = event['currentIntent']['slots']['password']
     url = 'https://' + url_tmp + '/api/'
     url = fix_url(url)
-
-    cookies = aci_login(url, username, password)
-    if type(cookies) is str:
-        mymessage = cookies
-    else:
-        mymessage = logged_in_message
-        sessionAttributes = {"url": url, "username": username, "password": password}
-
-    cookies_resp = generate_response_code(event,"SKIP",
+    try:
+        cookies = aci_login(url, username, password)
+        print(cookies)
+        if type(cookies) is dict:
+            mymessage = logged_in_message
+            sessionAttributes = {"url": url, "username": username, "password": password}
+            cookies_resp = generate_response_code(event,"SKIP",
                                           dialog_type="ELICIT",
                                           message=mymessage,
                                           sessionattributes=sessionAttributes)
-        # cookies_resp = {
-        #     "sessionAttributes": sessionAttributes,
-        #     "dialogAction": {
-        #         "type": "ElicitIntent",
-        #         "message": {"contentType": "PlainText", "content": mymessage}
-        #     }
-        #
-        # }
 
-    print(cookies_resp)
-    return cookies_resp
+            print(cookies_resp)
+            return cookies_resp
+        else:
+            mymessage = cookies
+            print(mymessage)
+            cookies_resp = generate_response_code(event,"SKIP",
+                                          dialog_type="ELICIT",
+                                          message=mymessage)
+
+            return cookies_resp
+    except:
+        mymessage=login_challenge
+        cookies_resp = generate_response_code(event,"SKIP",
+                                          dialog_type="ELICIT",
+                                          message=mymessage)
+        return cookies_resp
 
 
 if __name__ == "__main__":

@@ -2,7 +2,20 @@ import json
 
 def lambda_handler(event, context):
 
-    message = '\n*Hello from the Avengers ACI Bot!*\n\nI can help you in provisioning your ACI fabric. Here are the commands that I support:\n\n-   *“help”*- You can always review these commands simply by typing help.\n\n-   *“tenants”*- This will start a dialog to create Tenants.\n\n-   *“App profile”*- This will start a dialog create Application Network Profile.\n\n-   *“Bridge Domain”*- This will start a dialog create Bridge Domain.\n\n-   *“add subnet”*- This will start a dialog to add additional subnets to an existing Bridge Domain.\n\n-   *“EPG”*- This will start a dialog to create EPG and Associate to Physical or Virtual Domain.\n\n-   *“Troubleshooting”*- This will start a dialog to troubleshoot communication between source and Destination IP address.\n\n-   *“Snapshot”*- This will start a dialog to take a snapshot of the fabric.\n'
+    message='*Hello from the Avengers ACI Bot* \n\n'
+    message+='I can help in *provisioning & troubleshooting your ACI Fabric*.'
+    message+='Rest Assured that my capabilities will expand with time \n\n'
+    message+='Kindly use these *utterances* when talking to me: \n'
+    message+='*login* will initiate the login process \n'
+    message+='*help* will replay the utterances for proper interaction \n'
+    message+='*new tenant* will help you create a new tenant \n'
+    message+='*new app* will help you create a new application profile within a tenant\n'
+    message+='*new bd* will help you create a new bridge domain\n'
+    message+='*new epg* will help you create a new endpoint group within an Application Profile\n'
+    message+='*bind epg to an interface* will create \n'
+    message+='*snapshot* will take a local backup of the configuration on the APIC\n\n'
+    message+='*Please start by typing login to initiate the login process* \n'
+
     cookies_resp = {
         "dialogAction": {
             "type": "ElicitIntent",

@@ -1,7 +1,28 @@
 import json
 from string import Template
-from messages import ap_epg_exist_message, ap_exists_epg_created_message, ap_not_exist_message
-from utils import aci_login, generate_response_code, make_post_api_call, make_get_api_call
+from messages import *
+from utils import aci_login, generate_response_code, make_post_api_call, make_get_api_call,validate_if_logged_in
+
+def check_bd_exists(base_url, cookies, tenant_name, bd):
+    bd_url_full = '{}node/mo/uni/tn-{}/BD-{}.json'.format(base_url, tenant_name, bd)
+    bd_exist = make_get_api_call(bd_url_full, cookies=cookies)
+    json_data = json.loads(bd_exist.text)
+    if json_data['imdata'] == []:
+        return False
+    else:
+        return True
+
+
+def create_bd_w_subnet(base_url, cookies, tenant_name, bd, subnet):
+    bd_url_full = '{}node/mo/uni/tn-{}/BD-{}.json'.format(base_url, tenant_name, bd)
+
+    bd_create_template = Template(
+        '{"fvBD":{"attributes":{"dn":"uni/tn-${tenant_name}/BD-${bd_name}","name":"${bd_name}","rn":"BD-${bd_name}","status":"created"},"children":[{"fvSubnet":{"attributes":{"dn":"uni/tn-${tenant_name}/BD-${bd_name}/subnet-[${subnet}]","ctrl":"unspecified","ip":"${subnet}","rn":"subnet-[${subnet}]","status":"created"},"children":[]}},{"fvRsCtx":{"attributes":{"tnFvCtxName":"${tenant_name}","status":"created,modified"},"children":[]}}]}}')
+    bd_create = bd_create_template.substitute(tenant_name=tenant_name, bd_name=bd, subnet=subnet)
+
+    new_bd = make_post_api_call(bd_url_full, payload=bd_create, cookies=cookies)
+
+    return new_bd
 
 
 def check_ap_exists(base_url, cookies, tenant_name, ap):
@@ -49,7 +70,9 @@ def create_epg(base_url, cookies, tenant_name, ap, epg, bd):
 def epg_handler(event, context):
     # Get the url,username,and password from session attributes
     print(event)
-
+    if not validate_if_logged_in(event):
+        return generate_response_code(event,"SKIP",dialog_type="ELICIT",
+                                      message=not_logged_in)
     url = event['sessionAttributes']['url']
     username = event['sessionAttributes']['username']
     password = event['sessionAttributes']['password']
@@ -61,56 +84,53 @@ def epg_handler(event, context):
     ap = event['currentIntent']['slots']['app_profile']
     epg = event['currentIntent']['slots']['epg']
     bd = event['currentIntent']['slots']['bd']
-
+    subnet= event['currentIntent']['slots']['subnet']
     ap_exists = check_ap_exists(url, cookies, tenant_name, ap)
 
     if ap_exists == True:
         epg_exists = check_epg_exists(url, cookies, tenant_name, ap, epg)
         if epg_exists == True:
             ap_epg_exist_msg = ap_epg_exist_message.format(ap, epg)
-
             both_ap_epg_exist = generate_response_code(event,"SKIP",
                                                        dialog_type="CLOSEFULLFILLED",
                                                        message=ap_epg_exist_msg)
-            # both_ap_epg_exist = {
-            #     "dialogAction": {
-            #         "type": "Close",
-            #         "fulfillmentState": "Fulfilled",
-            #         "message": {"contentType": "PlainText", "content": ap_epg_exist_msg}
-            #     }
-            # }
             print(ap_epg_exist_msg)
             return both_ap_epg_exist
         else:
-            response = create_epg(url, cookies, tenant_name, ap, epg, bd)
-            print(response)
-            if response.status_code == 200:
-                ap_exists_epg_created_msg = ap_exists_epg_created_message.format(ap, epg)
+             if bd is None:
+                return generate_response_code(event,slots,
+                                          dialog_type="ELICITSLOT",
+                                          intent=event['currentIntent']['name'],
+                                          slot_to_elicit="bd",
+                                          message= bd_specify_message)
+             if not check_bd_exists(url, cookies, tenant_name, bd):
+                    if subnet is None:
+                        bd_specify_subnet_msg=bd_specify_subnet_message.format(bd)
+                        return generate_response_code(event,slots,
+                                          dialog_type="ELICITSLOT",
+                                          intent=event['currentIntent']['name'],
+                                          slot_to_elicit="subnet",
+                                          message= bd_specify_subnet_msg)
 
+                    create_bd_w_subnet(url, cookies, tenant_name, bd, subnet)
+             response = create_epg(url, cookies, tenant_name, ap, epg, bd)
+             print(response)
+             if response.status_code == 200:
+                ap_exists_epg_created_msg = ap_exists_epg_created_message.format(ap, epg)
                 ap_exists_epg_created = generate_response_code(event,"SKIP",
                                                                dialog_type="CLOSEFULLFILLED",
-                                                               message=ap_exists_epg_created_msg)
-                # ap_exists_epg_created = {
-                #     "dialogAction": {
-                #         "type": "Close",
-                #         "fulfillmentState": "Fulfilled",
-                #         "message": {"contentType": "PlainText", "content": ap_exists_epg_created_msg}
-                #     }
-                # }
+                                                               message= ap_exists_epg_created_msg)
+
                 print(ap_exists_epg_created_msg)
-                return ap_exists_epg_created
+                return  ap_exists_epg_created
+
+
     else:
         ap_not_exist_msg = ap_not_exist_message.format(tenant_name, ap)
         ap_not_exist = generate_response_code(event,"SKIP",
                                               dialog_type="CLOSEFULLFILLED",
                                               message=ap_not_exist_msg)
-        # ap_not_exist = {
-        #     "dialogAction": {
-        #         "type": "Close",
-        #         "fulfillmentState": "Failed",
-        #         "message": {"contentType": "PlainText", "content": ap_not_exist_msg}
-        #     }
-        # }
+
         print(ap_not_exist_msg)
         return ap_not_exist
 
