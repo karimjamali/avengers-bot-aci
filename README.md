@@ -5,7 +5,7 @@ This is a simple chatbot and an alexa skill to interact with Cisco ACI.
 Lex Configuration file is **acibot_41_82c56141-eff9-4634-8926-20b27b9c2ab1_Bot_LEX_V1.zip**
 includes all the Lex configuration (Intents, Slots, Slot Types, Error Handling..etc)
 
-
+![Diagram](https://raw.githubusercontent.com/karimjamali/avengers-bot-aci/master/github-pic.png)
 
 
 For the chatbot, it based on AWS Lex. You can find the getting started guide here:\
